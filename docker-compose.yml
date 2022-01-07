@@ -1,62 +1,31 @@
-version: '3.9'
+version: "3.9"
 
 services:
   
+  client:
+    image: hazartilirot/fibonacci-client
+    
+  api:
+    image: hazartilirot/fibonacci-server
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PGUSER=$PGUSER
+      - PGHOST=$PGHOST
+      - PGDATABASE=$PGDATABASE
+      - PGPASSWORD=$PGPASSWORD
+      - PGPORT=$PGPORT
+    
+  worker:
+    image: hazartilirot/fibonacci-worker
+    environment:
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+    
   nginx:
-    restart: always
-    build:
-      dockerfile: Dockerfile
-      context: ./nginx
+    image: hazartilirot/fibonacci-nginx
     ports:
-      - "8080:80"
-    depends_on: 
+      - "80:80"
+    depends_on:
       - api
       - client
-
-  postgres:
-    image: postgres:14.1-alpine
-    environment:
-      - POSTGRES_PASSWORD=root
-
-  redis:
-    image: redis:6.2.6-alpine
-
-  api:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./server
-    volumes:
-      - /app/node_modules
-      - ./server:/app
-    depends_on: 
-      - postgres
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGUSER=postgres
-      - PGHOST=postgres
-      - PGDATABASE=postgres
-      - PGPASSWORD=root
-      - PGPORT=5432
-
-  client:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./client
-    volumes:
-      - /app/node_modules
-      - ./client:/app
-
-  worker:
-    build:
-      dockerfile: Dockerfile.dev
-      context: ./worker
-    volumes:
-      - /app/node_modules
-      - ./worker:/app
-    depends_on:
-      - redis
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
