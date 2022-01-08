@@ -16,7 +16,7 @@ services:
   postgres:
     image: postgres:14.1-alpine
     environment:
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_PASSWORD=postgres_password
 
   redis:
     image: redis:6.2.6-alpine
@@ -47,6 +47,8 @@ services:
     volumes:
       - /app/node_modules
       - ./client:/app
+    environment:
+      - WDS_SOCKET_PORT=0
 
   worker:
     build:
